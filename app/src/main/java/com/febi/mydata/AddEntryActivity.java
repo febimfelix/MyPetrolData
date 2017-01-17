@@ -138,28 +138,6 @@ public class AddEntryActivity extends AppCompatActivity {
         }
     }
 
-    class StartDatePicker extends DialogFragment implements DatePickerDialog.OnDateSetListener {
-
-        Calendar calendar   = Calendar.getInstance();
-        int startYear       = calendar.get(Calendar.YEAR);
-        int startMonth      = calendar.get(Calendar.MONTH);
-        int startDay        = calendar.get(Calendar.DAY_OF_MONTH);
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            DatePickerDialog dialog = new DatePickerDialog(AddEntryActivity.this, this, startYear, startMonth, startDay);
-            return dialog;
-
-        }
-
-        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            startYear   = year;
-            startMonth  = monthOfYear + 1;
-            startDay    = dayOfMonth;
-            mDateTextView.setText(startDay + "/" + startMonth + "/" + startYear);
-        }
-    }
-
     private void showErrorToFillFields() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(AddEntryActivity.this);
         alertDialog.setMessage("Please fill fields properly!!!");
