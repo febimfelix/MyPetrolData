@@ -39,4 +39,7 @@
 
     <item android:id="@+id/id_clear"
         android:title="Clear Data" />
+
+    <item android:id="@+id/id_graph"
+        android:title="Show Graph"/>
 </menu>

@@ -3,27 +3,31 @@
     package="com.febi.mydata">
 
     <application
+        android:name=".AppContext"
         android:allowBackup="true"
         android:icon="@mipmap/mydata_icon"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name=".AppContext">
-
-        <activity android:name=".MainActivity"
-            android:screenOrientation="portrait"
-            android:label="Petrol Data">
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:label="Petrol Data"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".AddEntryActivity"
+            android:label="Add New Entry"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".AddEntryActivity"
-            android:screenOrientation="portrait"
-            android:label="Add New Entry"/>
-
+        <activity
+            android:name=".GraphActivity"
+            android:label="Graph Data"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<MyData> mMyDataList = new ArrayList<>();
     private ArrayList<MyData> mAllDataList= new ArrayList<>();
 
+    private float[] mMonthTotalArray = new float[12];
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,43 +76,46 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.id_jan:
-                updateViews(1);
+                updateViews(false, 1);
                 return true;
             case R.id.id_feb:
-                updateViews(2);
+                updateViews(false, 2);
                 return true;
             case R.id.id_mar:
-                updateViews(3);
+                updateViews(false, 3);
                 return true;
             case R.id.id_apr:
-                updateViews(4);
+                updateViews(false, 4);
                 return true;
             case R.id.id_may:
-                updateViews(5);
+                updateViews(false, 5);
                 return true;
             case R.id.id_jun:
-                updateViews(6);
+                updateViews(false, 6);
                 return true;
             case R.id.id_jul:
-                updateViews(7);
+                updateViews(false, 7);
                 return true;
             case R.id.id_aug:
-                updateViews(8);
+                updateViews(false, 8);
                 return true;
             case R.id.id_sep:
-                updateViews(9);
+                updateViews(false, 9);
                 return true;
             case R.id.id_oct:
-                updateViews(10);
+                updateViews(false, 10);
                 return true;
             case R.id.id_nov:
-                updateViews(11);
+                updateViews(false, 11);
                 return true;
             case R.id.id_dec:
-                updateViews(12);
+                updateViews(false, 12);
                 return true;
             case R.id.id_clear:
                 showAlert();
+                return true;
+            case R.id.id_graph:
+                showGraphActivity();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -134,29 +139,74 @@ public class MainActivity extends AppCompatActivity {
 
                 Calendar calendar   = Calendar.getInstance();
                 int month           = calendar.get(Calendar.MONTH) + 1;
-                updateViews(month);
+                updateViews(true, month);
             }
         }
     }
 
-    private void updateViews(int month) {
+    private void updateViews(boolean isUpdated, int month) {
         mMyDataList.clear();
 
-        int totalAmount = 0, totalQuantity = 0;
+        int totalAmount = 0, totalQuantity = 0, janTotal = 0, febTotal = 0, marTotal = 0,
+                aprTotal = 0, mayTotal = 0, junTotal = 0, julTotal = 0, augTotal = 0, sepTotal = 0,
+                octTotal = 0, novTotal = 0, decTotal = 0;
         for(MyData myData : mAllDataList) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Date convertedDate          = new Date();
+            Date convertedDate = new Date();
             try {
-                convertedDate           = dateFormat.parse(myData.getDate());
+                convertedDate = dateFormat.parse(myData.getDate());
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-            int monthNumber     = Integer.parseInt(DateFormat.format("MM", convertedDate).toString());
-            if(monthNumber == month) {
-                totalAmount     += Integer.parseInt(myData.getAmount());
-                totalQuantity   += myData.getQuantity();
+            int monthNumber = Integer.parseInt(DateFormat.format("MM", convertedDate).toString());
+            if (monthNumber == month) {
+                totalAmount += Integer.parseInt(myData.getAmount());
+                totalQuantity += myData.getQuantity();
                 mMyDataList.add(myData);
             }
+
+            //Calculate month wise data
+            if (isUpdated) {
+                int value = Integer.parseInt(myData.getAmount());
+                if (monthNumber == 1) {
+                    janTotal += value;
+                } else if (monthNumber == 2) {
+                    febTotal += value;
+                } else if (monthNumber == 3) {
+                    marTotal += value;
+                } else if (monthNumber == 4) {
+                    aprTotal += value;
+                } else if (monthNumber == 5) {
+                    mayTotal += value;
+                } else if (monthNumber == 6) {
+                    junTotal += value;
+                } else if (monthNumber == 7) {
+                    julTotal += value;
+                } else if (monthNumber == 8) {
+                    augTotal += value;
+                } else if (monthNumber == 9) {
+                    sepTotal += value;
+                } else if (monthNumber == 10) {
+                    octTotal += value;
+                } else if (monthNumber == 11) {
+                    novTotal += value;
+                } else if (monthNumber == 12) {
+                    decTotal += value;
+                }
+            }
+
+            mMonthTotalArray[0] = janTotal;
+            mMonthTotalArray[1] = febTotal;
+            mMonthTotalArray[2] = marTotal;
+            mMonthTotalArray[3] = aprTotal;
+            mMonthTotalArray[4] = mayTotal;
+            mMonthTotalArray[5] = junTotal;
+            mMonthTotalArray[6] = julTotal;
+            mMonthTotalArray[7] = augTotal;
+            mMonthTotalArray[8] = sepTotal;
+            mMonthTotalArray[9] = octTotal;
+            mMonthTotalArray[10] = novTotal;
+            mMonthTotalArray[11] = decTotal;
         }
 
         mAdapter.notifyDataSetChanged();
@@ -230,8 +280,14 @@ public class MainActivity extends AppCompatActivity {
             mAllDataList.clear();
             Calendar calendar   = Calendar.getInstance();
             int month           = calendar.get(Calendar.MONTH) + 1;
-            updateViews(month);
+            updateViews(true, month);
         }
+    }
+
+    private void showGraphActivity() {
+        Intent intent = new Intent(MainActivity.this, GraphActivity.class);
+        intent.putExtra("values", mMonthTotalArray);
+        startActivity(intent);
     }
 
     public void onListClick(int position) {
