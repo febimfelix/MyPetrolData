@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">MyPetrol</string>
+
+    <string name="select_year_prompt">Select a Year</string>
+    <string name="select_month_prompt">Select a Month</string>
 </resources>

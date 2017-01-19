@@ -10,11 +10,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.text.ParseException;
@@ -31,10 +35,17 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView mTotalDescriptionText;
 
-    private ArrayList<MyData> mMyDataList = new ArrayList<>();
-    private ArrayList<MyData> mAllDataList= new ArrayList<>();
+    private ArrayList<MyData> mMyDataList   = new ArrayList<>();
+    private ArrayList<MyData> mAllDataList  = new ArrayList<>();
 
-    private float[] mMonthTotalArray = new float[12];
+    private float[] mMonthTotalArray        = new float[12];
+
+    private Spinner mYearSpinner;
+    private Spinner mMonthSpinner;
+    private ArrayList<String> mYearArray    = new ArrayList<>();
+    private ArrayList<String> mMonthArray   = new ArrayList<>();
+    private String mSelectedYear            = "";
+    private String mSelectedMonth           = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView           = (RecyclerView) findViewById(R.id.my_recycler_view);
         mTotalDescriptionText   = (TextView) findViewById(R.id.id_month_total_desc_text);
         ImageView addView       = (ImageView) findViewById(R.id.id_add_row);
+        mYearSpinner            = (Spinner) findViewById(R.id.id_select_year_spinner);
+        mMonthSpinner           = (Spinner) findViewById(R.id.id_select_month_spinner);
 
         mLayoutManager  = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -56,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, AddEntryActivity.class));
             }
         });
+
+        populateSpinners();
     }
 
     @Override
@@ -75,42 +90,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.id_jan:
-                updateViews(false, 1);
-                return true;
-            case R.id.id_feb:
-                updateViews(false, 2);
-                return true;
-            case R.id.id_mar:
-                updateViews(false, 3);
-                return true;
-            case R.id.id_apr:
-                updateViews(false, 4);
-                return true;
-            case R.id.id_may:
-                updateViews(false, 5);
-                return true;
-            case R.id.id_jun:
-                updateViews(false, 6);
-                return true;
-            case R.id.id_jul:
-                updateViews(false, 7);
-                return true;
-            case R.id.id_aug:
-                updateViews(false, 8);
-                return true;
-            case R.id.id_sep:
-                updateViews(false, 9);
-                return true;
-            case R.id.id_oct:
-                updateViews(false, 10);
-                return true;
-            case R.id.id_nov:
-                updateViews(false, 11);
-                return true;
-            case R.id.id_dec:
-                updateViews(false, 12);
-                return true;
             case R.id.id_clear:
                 showAlert();
                 return true;
@@ -121,6 +100,67 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    private void populateSpinners() {
+        mSelectedYear   = Integer.toString(Calendar.getInstance().get(Calendar.YEAR));
+        mSelectedMonth  = getMonthNameFromInteger(Calendar.getInstance().get(Calendar.MONTH) + 1);
+        int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+
+        for(int i = 2013; i <= currentYear; i++) {
+            mYearArray.add(Integer.toString(i));
+        }
+
+        mMonthArray.add("January");
+        mMonthArray.add("February");
+        mMonthArray.add("March");
+        mMonthArray.add("April");
+        mMonthArray.add("May");
+        mMonthArray.add("June");
+        mMonthArray.add("July");
+        mMonthArray.add("August");
+        mMonthArray.add("September");
+        mMonthArray.add("October");
+        mMonthArray.add("November");
+        mMonthArray.add("December");
+
+        ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(MainActivity.this,
+                android.R.layout.simple_spinner_dropdown_item, mYearArray);
+        mYearSpinner.setAdapter(yearAdapter);
+        mYearSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mSelectedYear = mYearArray.get(position);
+                if(!mSelectedMonth.isEmpty()) {
+                    updateViews(true, getMonthFromString(mSelectedMonth));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        ArrayAdapter<String> monthAdapter = new ArrayAdapter<>(MainActivity.this,
+                android.R.layout.simple_spinner_dropdown_item, mMonthArray);
+        mMonthSpinner.setAdapter(monthAdapter);
+        mMonthSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mSelectedMonth = mMonthArray.get(position);
+                if(!mSelectedMonth.isEmpty()) {
+                    updateViews(true, getMonthFromString(mSelectedMonth));
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+
 
     private class GetValuesTask extends AsyncTask<Void, Void, ArrayList<MyData>> {
 
@@ -137,8 +177,7 @@ public class MainActivity extends AppCompatActivity {
                 mAllDataList.clear();
                 mAllDataList.addAll(myDatas);
 
-                Calendar calendar   = Calendar.getInstance();
-                int month           = calendar.get(Calendar.MONTH) + 1;
+                int month           = getMonthFromString(mSelectedMonth);
                 updateViews(true, month);
             }
         }
@@ -159,14 +198,15 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             int monthNumber = Integer.parseInt(DateFormat.format("MM", convertedDate).toString());
-            if (monthNumber == month) {
+            int year        = Integer.parseInt(DateFormat.format("yyyy", convertedDate).toString());
+            if (monthNumber == month && year == Integer.parseInt(mSelectedYear)) {
                 totalAmount += Integer.parseInt(myData.getAmount());
                 totalQuantity += myData.getQuantity();
                 mMyDataList.add(myData);
             }
 
             //Calculate month wise data
-            if (isUpdated) {
+            if (isUpdated && year == Integer.parseInt(mSelectedYear)) {
                 int value = Integer.parseInt(myData.getAmount());
                 if (monthNumber == 1) {
                     janTotal += value;
@@ -211,6 +251,18 @@ public class MainActivity extends AppCompatActivity {
 
         mAdapter.notifyDataSetChanged();
 
+        String monthString = getMonthNameFromInteger(month);
+        mTotalDescriptionText.setText(monthString + " : " + totalQuantity
+                + " Litres for Rs. " + totalAmount);
+
+        if(totalAmount > 5000) {
+            mTotalDescriptionText.setTextColor(Color.RED);
+        } else {
+            mTotalDescriptionText.setTextColor(Color.BLACK);
+        }
+    }
+
+    private String getMonthNameFromInteger(int month) {
         String monthString = "";
         if(month == 1) {
             monthString = "January";
@@ -237,14 +289,39 @@ public class MainActivity extends AppCompatActivity {
         } else if(month == 12) {
             monthString = "December";
         }
-        mTotalDescriptionText.setText(monthString + " : " + totalQuantity
-                + " Litres for Rs. " + totalAmount);
 
-        if(totalAmount > 5000) {
-            mTotalDescriptionText.setTextColor(Color.RED);
-        } else {
-            mTotalDescriptionText.setTextColor(Color.BLACK);
+        return monthString;
+    }
+
+    private int getMonthFromString(String monthString) {
+        int month = 1;
+        if(monthString.equals("January")) {
+            month = 1;
+        } else if(monthString.equals("February")) {
+            month = 2;
+        } else if(monthString.equals("March")) {
+            month = 3;
+        } else if(monthString.equals("April")) {
+            month = 4;
+        } else if(monthString.equals("May")) {
+            month = 5;
+        } else if(monthString.equals("June")) {
+            month = 6;
+        } else if(monthString.equals("July")) {
+            month = 7;
+        } else if(monthString.equals("August")) {
+            month = 8;
+        } else if(monthString.equals("September")) {
+            month = 9;
+        } else if(monthString.equals("October")) {
+            month = 10;
+        } else if(monthString.equals("November")) {
+            month = 11;
+        } else if(monthString.equals("December")) {
+            month = 12;
         }
+
+        return month;
     }
 
     private void showAlert() {
